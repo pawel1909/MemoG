@@ -47,7 +47,7 @@ namespace MemoG.src
             return words;
         }
 
-        public static void SaveHighScore(int guesses, int time, double score)
+        public static void SaveHighScore(int guesses, long time, double score)
         {
             string name = "";
             List<ScoreObject> scoreObjList;
@@ -115,7 +115,6 @@ namespace MemoG.src
             };
 
             string json = File.ReadAllText("Score.json");
-            Console.WriteLine(json);
             List<T> s = JsonSerializer.Deserialize<List<T>>(json, options);
             
 

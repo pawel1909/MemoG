@@ -27,7 +27,7 @@ namespace MemoG.src
 
         public override string ToString()
         {
-            return $"Name: {Name} -- Time left: {Time} -- Score: {Score}";
+            return $"Name: {Name} -- Time: {Time} -- Score: {Score}";
         }
     }
 }

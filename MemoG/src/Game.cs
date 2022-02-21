@@ -47,7 +47,7 @@ namespace MemoG
                 if (IsWin())
                 {
                     watch.StopWatch();
-                    return Win();
+                    return Win(watch.GetTime());
                 }
                 else if (_guessLeft == 0)
                 {
@@ -340,6 +340,7 @@ namespace MemoG
         {
             string A1 = "X", A2 = "X", A3 = "X", A4 = "X", A5 = "X", A6 = "X", A7 = "X", A8 = "X", B1 = "X", B2 = "X", B3 = "X", B4 = "X", B5 = "X", B6 = "X", B7 = "X", B8 = "X";
             Console.Clear();
+            ScoreBoard();
             if (_diffLevel == Level.easy)
             {
                 A1 = IsTrue(0, aLine, aWords);
@@ -397,16 +398,37 @@ namespace MemoG
             try
             {
                 List<ScoreObject> scores = FileManager.DeserializeScore<ScoreObject>();
-
-                foreach (var item in scores)
+                if (_diffLevel == Level.easy || _diffLevel == Level.hard)
                 {
-                    Console.WriteLine(item);
+                    Console.WriteLine("LatestScores");
+                    if (scores.Count() <= 4)
+                    {
+                        foreach (var item in scores)
+                        {
+                            Console.WriteLine(item);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            Console.WriteLine(scores[scores.Count() - 1 - i]);
+                        }
+                    }
                 }
+                if (_diffLevel == Level.score)
+                {
+                    foreach (var item in scores)
+                    {
+                        Console.WriteLine(item);
+                    }
+                }
+                Console.WriteLine();
             }
             catch (Exception)
             {
 
-                throw;
+                Console.WriteLine("You are first Player :)");
             }
         }
 
@@ -436,25 +458,28 @@ namespace MemoG
             return true;
         }
 
-        private double Score()
+        private double Score(long time, int guessLeft, Level level)
         {
-            return 0;
+            double score = 0;
+            if (level == Level.hard)
+            {
+                score += 100;
+            }
+            score += guessLeft * 10 + 3;
+            score -= time / 10;
+            return score;
         }
 
-        private bool Win()
+        private bool Win(long time)
         {
             while (true)
             {
+                double score = Score(time, _guessLeft, _diffLevel);
                 Console.WriteLine("Congratulation! You have successfully completed the game.");
-                Console.WriteLine($"Your score is: {Score()}");
-                Console.WriteLine("Do you want to save your score? Y/N");
-                string reply = Console.ReadKey(true).Key.ToString();
-                if (reply == "y" || reply == "Y")
-                {
-                    FileManager.SaveHighScore(_guessLeft, 0, Score());
-                }
+                Console.WriteLine($"Your score is: {score}");
+                FileManager.SaveHighScore(_guessLeft, time, score);
                 Console.WriteLine("Wanna try again? Y/N");
-                reply = Console.ReadKey(true).Key.ToString();
+                string reply = Console.ReadKey(true).Key.ToString();
                 if (reply.Length > 1)
                 {
                     continue;

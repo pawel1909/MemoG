@@ -13,21 +13,21 @@ namespace MemoG
         {
 
 
-            //while (true)
-            //{
-            //    Game app = new Game();
-            //    if (app.Start())
-            //    {
+            while (true)
+            {
+                Game app = new Game();
+                if (app.Start())
+                {
 
-            //        Console.Clear();
-            //        continue;
-            //    }
-            //    else
-            //    {
-            //        Console.Clear();
-            //        break;
-            //    }
-            //}
+                    Console.Clear();
+                    continue;
+                }
+                else
+                {
+                    Console.Clear();
+                    break;
+                }
+            }
 
 
         }
