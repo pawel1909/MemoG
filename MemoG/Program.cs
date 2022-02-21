@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using MemoG.src;
 using System.Linq;
+using System.Diagnostics;
 
 namespace MemoG
 {
@@ -10,37 +11,25 @@ namespace MemoG
     {
         static void Main(string[] args)
         {
-            //do poprawy
-            string pathToFile = Path.Combine(Environment.CurrentDirectory, @"Data\Words.txt");
 
-            Console.WriteLine(pathToFile);
-            Console.WriteLine();
-            //string x = FileManager.PathToDataFile("test.txt");
-            //Console.WriteLine(x);
-            Game app = new Game();
-            app.Start();
 
-            //Console.WriteLine(app._words.Count());
-            //foreach (var item in app._words)
+            //while (true)
             //{
-            //    Console.WriteLine(item);
+            //    Game app = new Game();
+            //    if (app.Start())
+            //    {
+
+            //        Console.Clear();
+            //        continue;
+            //    }
+            //    else
+            //    {
+            //        Console.Clear();
+            //        break;
+            //    }
             //}
-            //Console.WriteLine();
-            //printCol(app.aWords);
-            //Console.WriteLine();
-            //printCol(app.bWords);
 
 
-            //app.Start();
-
-        }
-
-        static void printCol(string[]? x)
-        {
-            foreach (var item in x)
-            {
-                Console.WriteLine(item);
-            }
         }
     }
 }

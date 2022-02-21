@@ -6,6 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="Data\Score.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\Words.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

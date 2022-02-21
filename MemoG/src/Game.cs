@@ -13,14 +13,22 @@ namespace MemoG
         private Level _diffLevel = Level.score;
         private const string Line = "------------------------------";
         //zmienic na private
-        public List<string> _words = new List<string>();
+        private List<string> _words = new List<string>();
         private int _guessLeft = 0;
+        #region easy
         private bool[] aLine = new bool[4] { false, false, false, false };
         private bool[] bLine = new bool[4] { false, false, false, false };
-        //zmień na private
-        public string[] aWords = new string[4] { "", "", "", "" };
-        public string[] bWords = new string[4] { "", "", "", "" };
+        private string[] aWords = new string[4] { "", "", "", "" };
+        private string[] bWords = new string[4] { "", "", "", "" };
+        #endregion easy
+        #region hard
+        private bool[] aHardLine = new bool[8] { false, false, false, false, false, false, false, false };
+        private bool[] bHardLine = new bool[8] { false, false, false, false, false, false, false, false };
+        private string[] aHardWords = new string[8] { "", "", "", "", "", "", "", "" };
+        private string[] bHardWords = new string[8] { "", "", "", "", "", "", "", "" };
+        #endregion hard
         Random rnd = new Random();
+        Watch watch = new Watch();
 
 
         public Game()
@@ -29,19 +37,35 @@ namespace MemoG
             RandomWordsPolupate();
 
         }
-        public void Start()
+        public bool Start()
         {
             while (true)
             {
                 Console.Clear();
+                watch.StartWatch();
                 Screen();
+                if (IsWin())
+                {
+                    watch.StopWatch();
+                    return Win();
+                }
+                else if (_guessLeft == 0)
+                {
+                    Console.Clear();
+                    return Lose();
+                }
+                else
+                {
+                    continue;
+                }
             }
         }
         public void Screen()
         {
             Board();
-            Guess("A");
-            Guess("B");
+            int first = Guess("A");
+            int second = Guess("B");
+            AreTheSame(first, second);
         }
         /// <summary>
         /// 
@@ -50,7 +74,6 @@ namespace MemoG
         /// <returns>index of chosen column from line</returns>
         public int InputChoice(string ab)
         {
-            ab = ab.ToUpper();
             Console.WriteLine($"Chose field {ab}:");
             while (true)
             {
@@ -59,56 +82,126 @@ namespace MemoG
                 {
                     continue;
                 }
-                string x = input[0].ToString();
-                if (x != ab)
-                {
-                    Console.WriteLine($"First character should be {ab}");
-                    continue;
-                }
                 if (input.Count() != 2)
                 {
                     Console.WriteLine($"Wrong input. Try something like this: {ab}2");
                     continue;
                 }
+                string x = input[0].ToString().ToUpper();
+                if (x != ab)
+                {
+                    Console.WriteLine($"First character should be {ab}");
+                    continue;
+                }
                 int y = int.Parse(input[1].ToString());
-                if (y != 1 && y != 2 && y != 3 && y != 4)
+                if (_diffLevel == Level.hard)
                 {
-                    Console.WriteLine("Second character should be a number 1, 2, 3 or 4");
-                    continue;
+                    if (y != 1 && y != 2 && y != 3 && y != 4 && y != 5 && y != 6 && y != 7 && y != 8)
+                    {
+                        Console.WriteLine("Second character should be a number 1, 2, 3, 4, 5, 6, 7, 8.");
+                        continue;
+                    }
+                    if (aHardLine[y - 1] && ab == "A")
+                    {
+                        Console.WriteLine($"{input} is uncovered already. Chose another one.");
+                        continue;
+                    }
+                    if (bHardLine[y - 1] && ab == "B")
+                    {
+                        Console.WriteLine($"{input} is uncovered already. Chose another one.");
+                        continue;
+                    }
                 }
-                if (aLine[y - 1] && ab == "A")
+                if (_diffLevel == Level.easy)
                 {
-                    Console.WriteLine($"{input} is uncovered already. Chose another one.");
-                    continue;
-                }
-                if (bLine[y - 1] && ab == "B")
-                {
-                    Console.WriteLine($"{input} is uncovered already. Chose another one.");
-                    continue;
+                    if (y != 1 && y != 2 && y != 3 && y != 4)
+                    {
+                        Console.WriteLine("Second character should be a number 1, 2, 3, 4.");
+                        continue;
+                    }
+                    if (aLine[y - 1] && ab == "A")
+                    {
+                        Console.WriteLine($"{input} is uncovered already. Chose another one.");
+                        continue;
+                    }
+                    if (bLine[y - 1] && ab == "B")
+                    {
+                        Console.WriteLine($"{input} is uncovered already. Chose another one.");
+                        continue;
+                    }
                 }
                 return y - 1;
 
             }
         }
 
-        private void Guess(string guess)
+        private int Guess(string guess)
         {
             int guessIndex = InputChoice(guess);
             if (guess == "A")
             {
-                aLine[guessIndex] = true;
+                if (_diffLevel == Level.easy)
+                {
+                    aLine[guessIndex] = true;
+                }
+                else if (_diffLevel == Level.hard)
+                {
+                    aHardLine[guessIndex] = true;
+                }
                 //refresh
                 Board();
             }
             else if (guess == "B")
             {
-                bLine[guessIndex] = true;
+                if (_diffLevel == Level.easy)
+                {
+                    bLine[guessIndex] = true;
+                }
+                else if (_diffLevel == Level.hard)
+                {
+                    bHardLine[guessIndex] = true;
+                }
                 //refresh
                 Board();
             }
             else
             {
                 throw new Exception("Something went wrong. ;/");
+            }
+            return guessIndex;
+        }
+
+        private void AreTheSame(int first, int second)
+        {
+            if (_diffLevel == Level.easy)
+            {
+                if (aWords[first] == bWords[second])
+                {
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Click to continue...");
+                    Console.ReadKey(true);
+                    aLine[first] = false;
+                    bLine[second] = false;
+                    _guessLeft -= 1;
+                }
+            }
+            if (_diffLevel == Level.hard)
+            {
+                if (aHardWords[first] == bHardWords[second])
+                {
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Click to continue...");
+                    Console.ReadKey(true);
+                    aHardLine[first] = false;
+                    bHardLine[second] = false;
+                    _guessLeft -= 1;
+                }
             }
         }
 
@@ -149,7 +242,6 @@ namespace MemoG
                 foreach (var item in numbers)
                 {
                     _words.Add(temp[item]);
-                    Console.WriteLine(item);
                 }
 
                 aWords = RandomPopulate(aWords, _words);
@@ -158,7 +250,19 @@ namespace MemoG
             }
             else if (_diffLevel == Level.hard)
             {
+                List<string> temp = new List<string>();
+                temp = FileManager.ReadWords("Words.txt");
+                foreach (var item in numbers)
+                {
+                    _words.Add(temp[item]);
+                }
 
+                aHardWords = RandomPopulate(aHardWords, _words);
+                bHardWords = RandomPopulate(bHardWords, _words);
+            }
+            else
+            {
+                throw new Exception("Jeszcze score!!!");
             }
         }
 
@@ -169,7 +273,7 @@ namespace MemoG
             {
                 while (true)
                 {
-                    r = rnd.Next(4);
+                    r = rnd.Next(array.Count());
                     if (array[r] == "")
                     {
                         array[r] = item;
@@ -210,6 +314,7 @@ namespace MemoG
                     return Level.score;
                 default:
                     Console.WriteLine("You are true beginer! Easy mode ON");
+                    _guessLeft = 10;
                     return Level.easy;
             }
         }
@@ -233,24 +338,57 @@ namespace MemoG
 
         public void Board()
         {
+            string A1 = "X", A2 = "X", A3 = "X", A4 = "X", A5 = "X", A6 = "X", A7 = "X", A8 = "X", B1 = "X", B2 = "X", B3 = "X", B4 = "X", B5 = "X", B6 = "X", B7 = "X", B8 = "X";
             Console.Clear();
-            string A1 = IsTrue(0, aLine, aWords);
-            string A2 = IsTrue(1, aLine, aWords);
-            string A3 = IsTrue(2, aLine, aWords);
-            string A4 = IsTrue(3, aLine, aWords);
+            if (_diffLevel == Level.easy)
+            {
+                A1 = IsTrue(0, aLine, aWords);
+                A2 = IsTrue(1, aLine, aWords);
+                A3 = IsTrue(2, aLine, aWords);
+                A4 = IsTrue(3, aLine, aWords);
 
-            string B1 = IsTrue(0, bLine, bWords);
-            string B2 = IsTrue(1, bLine, bWords);
-            string B3 = IsTrue(2, bLine, bWords);
-            string B4 = IsTrue(3, bLine, bWords);
+                B1 = IsTrue(0, bLine, bWords);
+                B2 = IsTrue(1, bLine, bWords);
+                B3 = IsTrue(2, bLine, bWords);
+                B4 = IsTrue(3, bLine, bWords);
+            }
+            if (_diffLevel == Level.hard)
+            {
+                A1 = IsTrue(0, aHardLine, aHardWords);
+                A2 = IsTrue(1, aHardLine, aHardWords);
+                A3 = IsTrue(2, aHardLine, aHardWords);
+                A4 = IsTrue(3, aHardLine, aHardWords);
+                A5 = IsTrue(4, aHardLine, aHardWords);
+                A6 = IsTrue(5, aHardLine, aHardWords);
+                A7 = IsTrue(6, aHardLine, aHardWords);
+                A8 = IsTrue(7, aHardLine, aHardWords);
+
+                B1 = IsTrue(0, bHardLine, bHardWords);
+                B2 = IsTrue(1, bHardLine, bHardWords);
+                B3 = IsTrue(2, bHardLine, bHardWords);
+                B4 = IsTrue(3, bHardLine, bHardWords);
+                B5 = IsTrue(4, bHardLine, bHardWords);
+                B6 = IsTrue(5, bHardLine, bHardWords);
+                B7 = IsTrue(6, bHardLine, bHardWords);
+                B8 = IsTrue(7, bHardLine, bHardWords);
+            }
 
             Console.WriteLine(Line);
             Console.WriteLine($"    Level: {_diffLevel}");
             Console.WriteLine($"    Guess Left: {_guessLeft}");
             Console.WriteLine();
-            Console.WriteLine("      1 2 3 4");
-            Console.WriteLine($"    A {A1} {A2} {A3} {A4}");
-            Console.WriteLine($"    B {B1} {B2} {B3} {B4}");
+            if (_diffLevel == Level.easy)
+            {
+                Console.WriteLine("      1 2 3 4");
+                Console.WriteLine($"    A {A1} {A2} {A3} {A4}");
+                Console.WriteLine($"    B {B1} {B2} {B3} {B4}");
+            }
+            if (_diffLevel == Level.hard)
+            {
+                Console.WriteLine("      1 2 3 4 5 6 7 8");
+                Console.WriteLine($"    A {A1} {A2} {A3} {A4} {A5} {A6} {A7} {A8}");
+                Console.WriteLine($"    B {B1} {B2} {B3} {B4} {B5} {B6} {B7} {B8}");
+            }
             Console.WriteLine(Line);
         }
 
@@ -258,7 +396,12 @@ namespace MemoG
         {
             try
             {
+                List<ScoreObject> scores = FileManager.DeserializeScore<ScoreObject>();
 
+                foreach (var item in scores)
+                {
+                    Console.WriteLine(item);
+                }
             }
             catch (Exception)
             {
@@ -268,31 +411,90 @@ namespace MemoG
         }
 
 
-        //te dwie poniżej chyba do usunięcia
-        List<string> ChoseWords()
+        private bool IsWin()
         {
-            List<string> words = ReadWords();
-
-            List<string> chosenWords = new List<string>();
-            List<int> chosenNumbers = new List<int>();
-
-
-
-            return words;
+            if (_diffLevel == Level.easy)
+            {
+                foreach (var item in aLine)
+                {
+                    if (!item)
+                    {
+                        return false;
+                    }
+                }
+            }
+            if (_diffLevel == Level.hard)
+            {
+                foreach (var item in aHardLine)
+                {
+                    if (!item)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
-        public static List<string> ReadWords()
+        private double Score()
         {
-            List<string> words = new List<string>();
-            string pathToFile = Path.Combine(Environment.CurrentDirectory, "Words.txt");
-            string file = File.ReadAllText(pathToFile);
-            var split = file.Split('\n');
-            foreach (var item in split)
-            {
-                words.Add(item);
-            }
+            return 0;
+        }
 
-            return words;
+        private bool Win()
+        {
+            while (true)
+            {
+                Console.WriteLine("Congratulation! You have successfully completed the game.");
+                Console.WriteLine($"Your score is: {Score()}");
+                Console.WriteLine("Do you want to save your score? Y/N");
+                string reply = Console.ReadKey(true).Key.ToString();
+                if (reply == "y" || reply == "Y")
+                {
+                    FileManager.SaveHighScore(_guessLeft, 0, Score());
+                }
+                Console.WriteLine("Wanna try again? Y/N");
+                reply = Console.ReadKey(true).Key.ToString();
+                if (reply.Length > 1)
+                {
+                    continue;
+                }
+                if (reply == "y" || reply == "Y")
+                {
+                    return true;
+                }
+                if (reply == "n" || reply == "N")
+                {
+                    return false;
+                }
+                Console.Clear();
+
+
+            }
+        }
+
+        private bool Lose()
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Unfortunately, you failed.");
+                Console.WriteLine("Wanna try again? Y/N");
+                string reply = Console.ReadKey(true).Key.ToString();
+                if (reply.Length > 1)
+                {
+                    continue;
+                }
+                if (reply == "y" || reply == "Y")
+                {
+                    return true;
+                }
+                if (reply == "n" || reply == "N")
+                {
+                    return false;
+                }
+                Console.Clear();
+            }
         }
     }
 }
