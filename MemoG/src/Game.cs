@@ -477,6 +477,9 @@ namespace MemoG
                 double score = Score(time, _guessLeft, _diffLevel);
                 Console.WriteLine("Congratulation! You have successfully completed the game.");
                 Console.WriteLine($"Your score is: {score}");
+                Console.WriteLine($"You end in: {time}s");
+                Console.WriteLine($"You left {_guessLeft} chances");
+                Console.WriteLine($"You play on {_diffLevel} mode");
                 FileManager.SaveHighScore(_guessLeft, time, score);
                 Console.WriteLine("Wanna try again? Y/N");
                 string reply = Console.ReadKey(true).Key.ToString();
